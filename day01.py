@@ -10,7 +10,7 @@ def similarity(l1, l2):
     return sum([x * sum([y == x for y in l2]) for x in l1])
 
 
-with open("day1_input") as input:
+with open("day01_input") as input:
     l1, l2 = zip(*[i[:-1].split("   ") for i in input])
     l1 = [int(i) for i in l1]
     l2 = [int(i) for i in l2]

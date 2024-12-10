@@ -61,7 +61,7 @@ def get_antinodes(antennas, max_x, max_y, resonance=False):
     return results
 
 
-antenna_types, max_x, max_y = read_antennas("day8_input")
+antenna_types, max_x, max_y = read_antennas("day08_input")
 res = get_antinodes(antenna_types, max_x, max_y)
 s = ""
 an = set()

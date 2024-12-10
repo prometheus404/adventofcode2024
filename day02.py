@@ -39,7 +39,7 @@ def check_safety_dampener(data):
     return n_safe
 
 
-with open("day2_input") as file:
+with open("day02_input") as file:
     data = [list(map(int, line[:-1].split())) for line in file]
 
 print("number of safe days: ", check_safety(data))
