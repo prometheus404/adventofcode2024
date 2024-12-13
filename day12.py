@@ -28,21 +28,6 @@ test_map = [
     ["A", "A", "A", "A", "A", "A"],
 ]
 
-
-def legal(pos):
-    return (0 <= pos[0] < max_x) and (0 <= pos[1] < max_y)
-
-
-def get_perimeter(region):
-    directions = [(-1, 0), (1, 0), (0, 1), (0, -1)]
-    acc = 0
-    for r in region:
-        for d in directions:
-            nxt = (r[0] + d[0], r[1] + d[1])
-            acc += (not legal(nxt) and 1) or (0 if nxt in region else 1)
-    return acc
-
-
 # notice how the next direction is a 90deg turn clockwise, this is important in get_discounted
 directions = [
     (-1, 0),  # left
@@ -50,6 +35,19 @@ directions = [
     (1, 0),  # right
     (0, -1),  # up
 ]
+
+
+def legal(pos):
+    return (0 <= pos[0] < max_x) and (0 <= pos[1] < max_y)
+
+
+def get_perimeter(region):
+    acc = 0
+    for r in region:
+        for d in directions:
+            nxt = (r[0] + d[0], r[1] + d[1])
+            acc += (not legal(nxt) and 1) or (0 if nxt in region else 1)
+    return acc
 
 
 def move(p, d):
@@ -69,10 +67,9 @@ def find_all_borders(region):
 
 
 def find_corners(region):
+    acc = 0
     # check corner made by a single plot
     borders = find_all_borders(region)
-    # print(borders)
-    acc = 0
     for p, d in list(borders):
         if (p, turn(d)) in borders and move(move(p, turn(d)), d) not in region:
             acc += 1
