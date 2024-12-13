@@ -11,6 +11,23 @@ test_map = [
     ["M", "M", "M", "I", "S", "S", "J", "E", "E", "E"],
 ]
 
+test_map = [
+    ["E", "E", "E", "E", "E"],
+    ["E", "X", "X", "X", "X"],
+    ["E", "E", "E", "E", "E"],
+    ["E", "X", "X", "X", "X"],
+    ["E", "E", "E", "E", "E"],
+]
+
+test_map = [
+    ["A", "A", "A", "A", "A", "A"],
+    ["A", "A", "A", "B", "B", "A"],
+    ["A", "A", "A", "B", "B", "A"],
+    ["A", "B", "B", "A", "A", "A"],
+    ["A", "B", "B", "A", "A", "A"],
+    ["A", "A", "A", "A", "A", "A"],
+]
+
 
 def legal(pos):
     return (0 <= pos[0] < max_x) and (0 <= pos[1] < max_y)
@@ -35,11 +52,8 @@ directions = [
 ]
 
 
-def find_border(region):
-    for p in region:
-        for d in directions:
-            if (p[0] + d[0], p[1] + d[1]) not in region:
-                return p, d
+def move(p, d):
+    return (p[0] + d[0], p[1] + d[1])
 
 
 # change direction (clockwise by default)
@@ -50,32 +64,35 @@ def turn(d, cclock=False):
         return directions[(directions.index(d) - 1) % len(directions)]
 
 
-def move(p, d):
-    return (p[0] + d[0], p[1] + d[1])
+def find_all_borders(region):
+    return {(p, d) for p in region for d in directions if move(p, d) not in region}
 
 
-def get_discounted(region):
-    start, border_dir = find_border(region)
-    d = turn(border_dir)
-    p = start
+def find_corners(region):
+    # check corner made by a single plot
+    borders = find_all_borders(region)
+    # print(borders)
     acc = 0
-    # we follow the border anc count the direction change
-    # until we reach the starting point with the same border direction
-    while p != start or turn(border_dir) != d or acc == 0:
-        # if there is a block in the border direction
-        # we change direction counterclockwise and move the point
-        border = turn(d, cclock=True)
-        if move(p, border) in region:
-            d = border
+    for p, d in list(borders):
+        if (p, turn(d)) in borders and move(move(p, turn(d)), d) not in region:
             acc += 1
-
-        p_next = move(p, d)  # next point (only if previous point was in region)
-        # check is p_next is inside otherwise change direction
-        if p_next not in region:
-            d = turn(d)
+            borders.discard((p, d))
+        if (p, turn(d, cclock=True)) in borders and (
+            move(move(p, turn(d, cclock=True)), d) not in region
+        ):
             acc += 1
-            continue
-        p = p_next
+            borders.discard((p, d))
+    # check corners made by two plot
+    borders = find_all_borders(region)
+    for p, d in list(borders):
+        for p2, d2 in list(borders):
+            if (
+                move(p, d) == move(p2, d2)
+                and abs(p[0] - p2[0]) == 1
+                and abs(p[1] - p2[1]) == 1
+            ):  # the second check is necessary to avoid ABA cases
+                acc += 1
+                borders.discard((p, d))
     return acc
 
 
@@ -122,5 +139,5 @@ with open("day12_input") as file:
 max_x = len(garden_map)
 max_y = len(garden_map[0])
 print(sum([get_area(r) * get_perimeter(r) for r in get_regions(garden_map)]))
-# [print("region:", r, "fences:", get_discounted(r)) for r in get_regions(garden_map)]
-print(sum([get_discounted(r) * get_area(r) for r in get_regions(garden_map)]))
+# [print("region:", r, "fences:", find_corners(r)) for r in get_regions(garden_map)]
+print(sum([find_corners(r) * get_area(r) for r in get_regions(garden_map)]))
